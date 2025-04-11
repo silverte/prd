@@ -38,3 +38,4 @@ terraform.rc
 
 # Ignore key pair file
 .pem
+user_data_app.sh
