@@ -1,22 +1,3 @@
-##########################################################################
-# IAM Module
-# reference: https://github.com/terraform-aws-modules/terraform-aws-iam
-##########################################################################
-module "iam_account" {
-  source                         = "terraform-aws-modules/iam/aws//modules/iam-account"
-  create_account_password_policy = var.create_account_password_policy
-
-  account_alias = var.account_alias
-
-  max_password_age             = 90
-  minimum_password_length      = 8
-  password_reuse_prevention    = 3
-  require_lowercase_characters = true
-  require_uppercase_characters = true
-  require_symbols              = true
-  require_numbers              = true
-}
-
 #################################################################################
 # IAM assumable role for admin
 #################################################################################
@@ -217,4 +198,52 @@ module "iam_assumable_role_viewonly" {
       Name = "role-${var.service}-${var.environment}-viewOnly"
     },
   )
+}
+
+#################################################################################
+# IAM role for VM app
+#################################################################################
+resource "aws_iam_role" "vm_app" {
+  count = var.create_iam_vm_role ? 1 : 0
+
+  name = "role-${var.service}-${var.environment}-vm-app-default"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_vm_default" {
+  count = var.create_iam_vm_role ? 1 : 0
+
+  role       = aws_iam_role.vm_app[0].name
+  policy_arn = module.iam_policy_vm_app.arn
+}
+
+resource "aws_iam_role_policy_attachment" "attach_vm_default_initial" {
+  count = var.create_iam_vm_role ? 1 : 0
+
+  role       = aws_iam_role.vm_app[0].name
+  policy_arn = module.iam_policy_vm_app_initial.arn
+}
+
+resource "aws_iam_role_policy_attachment" "attach_vm_ssm" {
+  count = var.create_iam_vm_role ? 1 : 0
+
+  role       = aws_iam_role.vm_app[0].name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  count = var.create_iam_vm_role ? 1 : 0
+
+  name = "role-${var.service}-${var.environment}-vm-app-default"
+  role = aws_iam_role.vm_app[0].name
 }
