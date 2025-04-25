@@ -2,7 +2,7 @@ module "security_group" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 5.0"
 
-  for_each = var.create_security_groups ? var.security_groups : {}
+  for_each = var.create_security_group ? var.security_groups : {}
 
   create          = true
   name            = "scg-${var.service}-${var.environment}-${each.value.resource_type}-${each.key}"
