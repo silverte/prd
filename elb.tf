@@ -14,7 +14,7 @@ module "alb_vm" {
 
   # Security Group
   create_security_group = false
-  security_groups       = var.alb_vm_security_groups
+  security_groups       = try([module.security_group["vm-backend"].security_group_id], null)
 
   tags = merge(
     local.tags,
@@ -47,7 +47,7 @@ module "nlb_vm" {
   ]
   # Security Group
   create_security_group = false
-  security_groups       = var.nlb_vm_security_groups
+  security_groups       = try([module.security_group["vm"].security_group_id], null)
 
   tags = merge(
     local.tags,
@@ -80,7 +80,7 @@ module "nlb_container" {
   ]
 
   create_security_group = false
-  security_groups       = var.nlb_container_security_groups
+  security_groups       = try([module.security_group["container"].security_group_id], null)
 
   tags = merge(
     local.tags,

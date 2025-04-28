@@ -7,12 +7,16 @@ module "elasticache-data" {
   source = "terraform-aws-modules/elasticache/aws"
   create = var.create_elasticache
 
-  cluster_id                 = "ec-${var.service}-${var.environment}-${var.elasticache_cluster_name}"
-  create_cluster             = true
-  cluster_mode_enabled       = false
-  create_replication_group   = false
+  create_cluster       = false
+  cluster_mode_enabled = false
+
+  create_replication_group = true
+  replication_group_id     = "ec-${var.service}-${var.environment}-${var.elasticache_cluster_name}"
+  description              = "ElastiCache replication group"
+
   multi_az_enabled           = false
   automatic_failover_enabled = false
+  num_cache_nodes            = 1
 
   engine_version = var.elasticache_cluster_engine_version
   port           = var.elasticache_cluster_port
@@ -22,7 +26,7 @@ module "elasticache-data" {
 
   # Security Group
   create_security_group = false
-  security_group_ids    = var.elasticache_cluster_security_groups
+  security_group_ids    = try([module.security_group["data"].security_group_id], null)
 
   at_rest_encryption_enabled = true
   transit_encryption_enabled = false
@@ -39,6 +43,9 @@ module "elasticache-data" {
   parameter_group_family      = var.elasticache_cluster_parameter_group_family
   parameter_group_description = "elasticache parameter group"
   parameters                  = []
+
+  # log_delivery_configuration = {}
+  apply_immediately = true
 
   tags = merge(
     local.tags,

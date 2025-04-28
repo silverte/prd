@@ -39,10 +39,3 @@ variable "create_elasticache" {
   type        = bool
   default     = false
 }
-
-# Elasticache Cluster Security groups 
-variable "elasticache_cluster_security_groups" {
-  description = "Elasticache Cluster Security groups"
-  type        = list(string)
-  default     = []
-}
