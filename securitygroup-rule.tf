@@ -9,7 +9,7 @@
 #     command = <<EOF
 # #!/bin/bash
 # SG_IDS=$(aws ec2 describe-security-groups \
-#   --query "SecurityGroups[?contains(GroupName, 'market') || contains(GroupName, 'pay') || contains(GroupName, 'checkin') || contains(GroupName, 'etc')].GroupId" \
+#   --query "SecurityGroups[?contains(GroupName, 'market') || contains(GroupName, 'pay') || contains(GroupName, 'checkin') || contains(GroupName, 'heathcare')].GroupId" || contains(GroupName, 'homepage')].GroupId" || contains(GroupName, 'external')].GroupId" \
 #   --output text)
 
 # for SG_ID in $SG_IDS; do
@@ -20,7 +20,7 @@
 # done
 
 # SG_IDS=$(aws ec2 describe-security-groups \
-#   --query 'SecurityGroups[?!contains(GroupName, `alb`) && !contains(GroupName, `nlb`) && !contains(GroupName, `eks-cluster`) && !contains(GroupName, `efs`)  && !contains(GroupName, `elasticache`)].GroupId' \
+#   --query 'SecurityGroups[?!contains(GroupName, `alb`) && !contains(GroupName, `nlb`) && !contains(GroupName, `eks-cluster`) && !contains(GroupName, `efs`)  && !contains(GroupName, `elasticache`)].GroupId'  && !contains(GroupName, `jennifer`)].GroupId' \
 #   --output text)
 
 # for SG_ID in $SG_IDS; do
@@ -50,7 +50,7 @@
 #     command     = <<EOF
 # #!/bin/bash
 # SG_IDS=$(aws ec2 describe-security-groups \
-#   --query "SecurityGroups[?contains(GroupName, 'market') || contains(GroupName, 'pay') || contains(GroupName, 'checkin') || contains(GroupName, 'etc')].GroupId" \
+#   --query "SecurityGroups[?contains(GroupName, 'market') || contains(GroupName, 'pay') || contains(GroupName, 'checkin') || contains(GroupName, 'heathcare')].GroupId" || contains(GroupName, 'homepage')].GroupId" || contains(GroupName, 'external')].GroupId" \
 #   --output text)
 
 # for SG_ID in $SG_IDS; do
@@ -61,7 +61,7 @@
 # done
 
 # SG_IDS=$(aws ec2 describe-security-groups \
-#   --query 'SecurityGroups[?!contains(GroupName, `alb`) && !contains(GroupName, `nlb`) && !contains(GroupName, `eks-cluster`) && !contains(GroupName, `efs`)  && !contains(GroupName, `elasticache`)].GroupId' \
+#   --query 'SecurityGroups[?!contains(GroupName, `alb`) && !contains(GroupName, `nlb`) && !contains(GroupName, `eks-cluster`) && !contains(GroupName, `efs`)  && !contains(GroupName, `elasticache`)].GroupId'  && !contains(GroupName, `jennifer`)].GroupId' \
 #   --output text)
 
 # for SG_ID in $SG_IDS; do
@@ -95,7 +95,7 @@
 # for SG_ID in $SG_IDS; do
 #   echo "Adding rules to Security Group: $SG_ID"
 #   aws ec2 authorize-security-group-ingress --group-id $SG_ID --ip-permissions '[
-#     {"IpProtocol":"tcp","FromPort":22,"ToPort":22,"UserIdGroupPairs":[{"GroupId":"sg-067d20c53a70d856d", "Description":"DEV admin server"}]},
+#     {"IpProtocol":"tcp","FromPort":22,"ToPort":22,"UserIdGroupPairs":[{"CidrIp": "10.221.32.6/32", "Description":"Prd workbench server"}]},
 #     {"IpProtocol":"tcp","FromPort":22,"ToPort":22,"PrefixListIds":[{"PrefixListId":"pl-05f5d1bfbb8cde8f0","Description":"Security bastion server"}]}
 #   ]' || echo "Ingress rules may already exist for $SG_ID"
 # done
@@ -119,7 +119,7 @@
 # for SG_ID in $SG_IDS; do
 #   echo "Removing rules from Security Group: $SG_ID"
 #   aws ec2 revoke-security-group-ingress --group-id $SG_ID --ip-permissions '[
-#     {"IpProtocol":"tcp","FromPort":22,"ToPort":22,"UserIdGroupPairs":[{"GroupId":"sg-067d20c53a70d856d"}]},
+#     {"IpProtocol":"tcp","FromPort":22,"ToPort":22,"UserIdGroupPairs":[{"CidrIp": "10.221.32.6/32"}]},
 #     {"IpProtocol":"tcp","FromPort":22,"ToPort":22,"PrefixListIds":[{"PrefixListId":"pl-05f5d1bfbb8cde8f0"}]}
 #   ]' || echo "Ingress rules already removed or not present for $SG_ID"
 # done

@@ -42,7 +42,6 @@ module "rds-maria" {
 
   storage_encrypted = true
   storage_type      = "gp3"
-  # max_allocated_storage = var.rds_mariadb_as_allocated_storage * 1.1
   kms_key_id        = data.aws_kms_key.rds.arn
   allocated_storage = var.rds_mariadb_allocated_storage
 
@@ -54,40 +53,25 @@ module "rds-maria" {
   manage_master_user_password = true
   port                        = var.rds_mariadb_port
 
-  multi_az               = false
-  availability_zone      = element(local.azs, 0)
-  db_subnet_group_name   = try(aws_db_subnet_group.rds_subnet_group[0].name, "")
+  multi_az               = true
+  db_subnet_group_name   = try(aws_db_subnet_group.rds_subnet_group[0].name, null)
   subnet_ids             = [element(data.aws_subnets.database.ids, 0)]
   vpc_security_group_ids = try([module.security_group["mariadb-solution"].security_group_id], null)
-
-  #   maintenance_window              = "Mon:00:00-Mon:03:00"
-  #   backup_window                   = "03:00-06:00"
-  #   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
-  #   create_cloudwatch_log_group     = true
 
   backup_retention_period    = 7
   skip_final_snapshot        = true
   auto_minor_version_upgrade = false
   deletion_protection        = true
 
-  #   performance_insights_enabled          = true
-  #   performance_insights_retention_period = 7
-  #   create_monitoring_role                = true
-  #   monitoring_interval                   = 60
-  #   monitoring_role_name                  = "example-monitoring-role-name"
-  #   monitoring_role_use_name_prefix       = true
-  #   monitoring_role_description           = "Description for monitoring role"
+  # performance_insights_enabled          = true
+  # performance_insights_retention_period = 7
+  # create_monitoring_role                = true
+  # monitoring_interval                   = 60
+  # monitoring_role_name                  = "role-${var.service}-${var.environment}-${var.rds_mariadb_name}-monitoring"
+  # monitoring_role_use_name_prefix       = false
+  # monitoring_role_description           = "MariaDB solution for monitoring role"
 
-  #   parameters = [
-  #     {
-  #       name  = "autovacuum"
-  #       value = 1
-  #     },
-  #     {
-  #       name  = "client_encoding"
-  #       value = "utf8"
-  #     }
-  #   ]
+  parameters = []
 
   tags = merge(
     local.tags,
@@ -98,49 +82,10 @@ module "rds-maria" {
   )
 }
 
-# ################################################################################
-# # RDS Automated Backups Replication Module
-# ################################################################################
-
-# provider "aws" {
-#   alias  = "region2"
-#   region = local.region2
-# }
-
-# module "kms" {
-#   source      = "terraform-aws-modules/kms/aws"
-#   version     = "~> 1.0"
-#   description = "KMS key for cross region automated backups replication"
-
-#   # Aliases
-#   aliases                 = [local.name]
-#   aliases_use_name_prefix = true
-
-#   key_owners = [data.aws_caller_identity.current.arn]
-
-#   tags = local.tags
-
-#   providers = {
-#     aws = aws.region2
-#   }
-# }
-
-# module "db_automated_backups_replication" {
-#   source = "../../modules/db_instance_automated_backups_replication"
-
-#   source_db_instance_arn = module.db.db_instance_arn
-#   kms_key_arn            = module.kms.key_arn
-
-#   providers = {
-#     aws = aws.region2
-#   }
-# }
-
 ################################################################################
 # RDS Module
 # reference: https://github.com/terraform-aws-modules/terraform-aws-rds
 ################################################################################
-
 module "rds-oracle" {
   source                    = "terraform-aws-modules/rds/aws"
   create_db_instance        = var.create_oracle
@@ -164,7 +109,6 @@ module "rds-oracle" {
 
   storage_encrypted = true
   storage_type      = "gp3"
-  # max_allocated_storage = var.rds_oracle_to_allocated_storage * 1.1
   kms_key_id        = data.aws_kms_key.rds.arn
   allocated_storage = var.rds_oracle_allocated_storage
 
@@ -181,11 +125,6 @@ module "rds-oracle" {
   subnet_ids             = [element(data.aws_subnets.database.ids, 0)]
   vpc_security_group_ids = try([module.security_group["oracle-solution"].security_group_id], null)
 
-  # maintenance_window              = "Mon:00:00-Mon:03:00"
-  # backup_window                   = "03:00-06:00"
-  # enabled_cloudwatch_logs_exports = ["alert", "audit"]
-  # create_cloudwatch_log_group     = true
-
   backup_retention_period    = 7
   skip_final_snapshot        = true
   auto_minor_version_upgrade = false
@@ -194,10 +133,16 @@ module "rds-oracle" {
   # performance_insights_enabled          = true
   # performance_insights_retention_period = 7
   # create_monitoring_role                = true
+  # monitoring_interval                   = 60
+  # monitoring_role_name                  = "role-${var.service}-${var.environment}-${var.rds_oracle_name}-monitoring"
+  # monitoring_role_use_name_prefix       = false
+  # monitoring_role_description           = "Oracle solution for monitoring role"
 
   # See here for support character sets https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.OracleCharacterSets.html
   character_set_name       = "AL32UTF8"
   nchar_character_set_name = "AL16UTF16"
+
+  parameters = []
 
   tags = merge(
     local.tags,
@@ -207,39 +152,6 @@ module "rds-oracle" {
     },
   )
 }
-
-################################################################################
-# RDS Automated Backups Replication Module
-################################################################################
-
-# module "kms" {
-#   source      = "terraform-aws-modules/kms/aws"
-#   version     = "~> 1.0"
-#   description = "KMS key for cross region automated backups replication"
-
-#   # Aliases
-#   aliases                 = [local.name]
-#   aliases_use_name_prefix = true
-
-#   key_owners = [data.aws_caller_identity.current.arn]
-
-#   tags = local.tags
-
-#   providers = {
-#     aws = aws.region2
-#   }
-# }
-
-# module "db_automated_backups_replication" {
-#   source = "../../modules/db_instance_automated_backups_replication"
-
-#   source_db_instance_arn = module.db.db_instance_arn
-#   kms_key_arn            = module.kms.key_arn
-
-#   providers = {
-#     aws = aws.region2
-#   }
-# }
 
 ################################################################################
 # RDS Aurora Module
@@ -261,14 +173,15 @@ module "aurora-postgresql" {
   instance_class                       = var.rds_aurora_cluster_instance_class
   instances = {
     1 = {},
-    # 2 = {}
+    2 = {},
+    3 = {}
   }
   # autoscaling_enabled      = true
   # autoscaling_min_capacity = 2
   # autoscaling_max_capacity = 2
 
   vpc_id               = data.aws_vpc.vpc.id
-  db_subnet_group_name = try(aws_db_subnet_group.rds_subnet_group[0].name, "")
+  db_subnet_group_name = try(aws_db_subnet_group.rds_subnet_group[0].name, null)
   publicly_accessible  = false
 
   create_security_group  = false
@@ -297,27 +210,11 @@ module "aurora-postgresql" {
       apply_method = "immediate"
     }
   ]
-  # create_db_parameter_group      = true
-  # db_parameter_group_name        = "pg-${var.service}-${var.environment}-${var.rds_aurora_cluster_name}"
-  # db_parameter_group_family      = "aurora-postgresql14"
-  # db_parameter_group_description = "DB parameter group"
-  # db_parameter_group_parameters = [
-  #   {
-  #     name         = "log_min_duration_statement"
-  #     value        = 4000
-  #     apply_method = "immediate"
-  #   }
-  # ]
-  # enabled_cloudwatch_logs_exports = ["postgresql"]
-  # create_cloudwatch_log_group     = true
-  create_monitoring_role = true
-  monitoring_interval    = 60
-  monitoring_role_arn    = aws_iam_role.rds_monitoring_role.arn
 
-  cluster_performance_insights_enabled = true
-  # cluster_performance_insights_kms_key_id       = data.aws_kms_key.rds.arn
-  cluster_performance_insights_retention_period = 7
-
+  monitoring_interval                   = 60
+  monitoring_role_arn                   = var.create_aurora_postresql ? aws_iam_role.rds_monitoring_role[0].arn : null
+  performance_insights_enabled          = true
+  performance_insights_retention_period = 7
 
   tags = merge(
     local.tags,
@@ -328,9 +225,9 @@ module "aurora-postgresql" {
   )
 }
 
-
 resource "aws_iam_role" "rds_monitoring_role" {
-  name = "role-${var.service}-${var.environment}-rds-monitoring"
+  count = var.create_aurora_postresql ? 1 : 0
+  name  = "role-${var.service}-${var.environment}-${var.rds_aurora_cluster_name}-monitoring"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -347,6 +244,7 @@ resource "aws_iam_role" "rds_monitoring_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "rds_monitoring_attachment" {
-  role       = aws_iam_role.rds_monitoring_role.name
+  count      = var.create_aurora_postresql ? 1 : 0
+  role       = aws_iam_role.rds_monitoring_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }

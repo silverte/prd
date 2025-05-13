@@ -14,9 +14,9 @@ module "elasticache-data" {
   replication_group_id     = "ec-${var.service}-${var.environment}-${var.elasticache_cluster_name}"
   description              = "ElastiCache replication group"
 
-  multi_az_enabled           = false
-  automatic_failover_enabled = false
-  num_cache_nodes            = 1
+  multi_az_enabled           = true
+  automatic_failover_enabled = true
+  num_cache_nodes            = 2
 
   engine_version = var.elasticache_cluster_engine_version
   port           = var.elasticache_cluster_port
