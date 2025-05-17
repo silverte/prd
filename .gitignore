@@ -41,5 +41,4 @@ terraform.rc
 
 # ec2 user data
 user_data_app.sh
-user_data_app_exclude_whatap.sh
-user_data_sol_exclude_whatap.sh
+user_data_sol.sh
