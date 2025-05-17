@@ -19,6 +19,22 @@ module "s3_bucket_cm_contents" {
   )
 }
 
+module "s3_bucket_qa" {
+  source        = "terraform-aws-modules/s3-bucket/aws"
+  create_bucket = var.create_s3_bucket_qa
+  for_each      = toset(var.s3_bucket_names_qa)
+
+  bucket        = "s3-${var.service}-qa-${each.key}"
+  force_destroy = true
+
+  tags = merge(
+    local.tags,
+    {
+      "Name" = "s3-${var.service}-qa-${each.key}"
+    }
+  )
+}
+
 module "s3_bucket_app_logs" {
   source        = "terraform-aws-modules/s3-bucket/aws"
   version       = "~> 4.0"

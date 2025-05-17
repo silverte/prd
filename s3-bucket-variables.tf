@@ -25,3 +25,17 @@ variable "s3_bucket_name_app_logs" {
   type        = string
   default     = ""
 }
+
+# Whether to create an S3 Bucket for QA (True or False)
+variable "create_s3_bucket_qa" {
+  description = "Whether to create an S3 Bucket App"
+  type        = bool
+  default     = false
+}
+
+# S3 Bucket names
+variable "s3_bucket_names_qa" {
+  description = "S3 Bucket name for QA"
+  type        = list(string)
+  default     = []
+}
