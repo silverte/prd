@@ -22,7 +22,7 @@ module "ec2_instances" {
   user_data                   = each.value.user_data_file != "" ? file("${path.module}/${each.value.user_data_file}") : null
   user_data_replace_on_change = true
   private_ip                  = each.value.private_ip
-  iam_instance_profile        = "role-${var.service}-${var.environment}-vm-app-default"
+  iam_instance_profile        = each.value.name != "workbench" ? "role-${var.service}-${var.environment}-vm-app-default" : "role-${var.service}-${var.environment}-eks-admin"
 
   metadata_options = {
     http_endpoint               = "enabled"
