@@ -9,7 +9,7 @@ resource "null_resource" "add_sg_rules_permanent" {
     command = <<EOF
 #!/bin/bash
 SG_IDS=$(aws ec2 describe-security-groups \
-  --query "SecurityGroups[?contains(GroupName, 'market') || contains(GroupName, 'pay') || contains(GroupName, 'checkin') || contains(GroupName, 'heathcare') || contains(GroupName, 'homepage') || contains(GroupName, 'external')].GroupId" \
+  --query "SecurityGroups[?contains(GroupName, 'market') || contains(GroupName, 'batch') || contains(GroupName, 'external') ||contains(GroupName, 'pay') || contains(GroupName, 'checkin') || contains(GroupName, 'heathcare') || contains(GroupName, 'homepage') || contains(GroupName, 'external')].GroupId" \
   --output text)
 
 for SG_ID in $SG_IDS; do
@@ -48,9 +48,9 @@ EOF
     interpreter = ["/bin/bash", "-c"]
   }
 
-#   lifecycle {
-#     ignore_changes = [triggers]
-#   }
+  #   lifecycle {
+  #     ignore_changes = [triggers]
+  #   }
 }
 
 # Security Group 룰 삭제 (변수가 false일 때)
@@ -58,10 +58,10 @@ resource "null_resource" "remove_sg_rules_permanent" {
   count = var.create_security_group_rule_permanent ? 0 : 1
 
   provisioner "local-exec" {
-    command = <<EOF
+    command     = <<EOF
 #!/bin/bash
 SG_IDS=$(aws ec2 describe-security-groups \
-  --query "SecurityGroups[?contains(GroupName, 'market') || contains(GroupName, 'pay') || contains(GroupName, 'checkin') || contains(GroupName, 'heathcare') || contains(GroupName, 'homepage') || contains(GroupName, 'external')].GroupId" \
+  --query "SecurityGroups[?contains(GroupName, 'market') || contains(GroupName, 'batch') || contains(GroupName, 'external') || contains(GroupName, 'pay') || contains(GroupName, 'checkin') || contains(GroupName, 'heathcare') || contains(GroupName, 'homepage') || contains(GroupName, 'external')].GroupId" \
   --output text)
 
 for SG_ID in $SG_IDS; do
@@ -108,7 +108,7 @@ resource "null_resource" "add_sg_rules_temporary" {
   count = var.create_security_group_rule_temporary ? 1 : 0
 
   provisioner "local-exec" {
-    command = <<EOF
+    command     = <<EOF
 #!/bin/bash
 SG_IDS=$(aws ec2 describe-security-groups \
   --query 'SecurityGroups[?!contains(GroupName, `alb`) && !contains(GroupName, `nlb`) && !contains(GroupName, `eks-cluster`) && !contains(GroupName, `efs`) && !contains(GroupName, `elasticache`) && !contains(GroupName, `node`) && !contains(GroupName, `aurora`) && !contains(GroupName, `armedis`)].GroupId' \
@@ -132,7 +132,7 @@ resource "null_resource" "remove_sg_rules_temporary" {
   count = var.create_security_group_rule_temporary ? 0 : 1
 
   provisioner "local-exec" {
-    command = <<EOF
+    command     = <<EOF
 #!/bin/bash
 SG_IDS=$(aws ec2 describe-security-groups \
   --query 'SecurityGroups[?!contains(GroupName, `alb`) && !contains(GroupName, `nlb`) && !contains(GroupName, `eks-cluster`) && !contains(GroupName, `efs`) && !contains(GroupName, `elasticache`) && !contains(GroupName, `node`) && !contains(GroupName, `aurora`) && !contains(GroupName, `armedis`)].GroupId' \
@@ -150,7 +150,7 @@ EOF
     interpreter = ["/bin/bash", "-c"]
   }
 
-#   lifecycle {
-#     ignore_changes = [triggers]
-#   }
+  #   lifecycle {
+  #     ignore_changes = [triggers]
+  #   }
 }
